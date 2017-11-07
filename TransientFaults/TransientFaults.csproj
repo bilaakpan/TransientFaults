@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netstandard1.2;net452;net46;net461;net462;net47</TargetFrameworks>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Bila Akpan</Authors>
+    <Company>Worksnippet</Company>
+    <Owners>Bila Akpan</Owners>
+    <Description>Postmates .NET SDK</Description>
+    <PackageProjectUrl>https://github.com/bilaakpan/PostmatesSDK</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/bilaakpan/PostmatesSDK</RepositoryUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <summary>Postmates .NET SDK</summary>
+    <Title>Postmates .NET SDK</Title>
+    <PackageTags>Postmates</PackageTags>
+    <Tags>Postmates</Tags>
+  </PropertyGroup>
+
+
+  <ItemGroup>
+    <PackageReference Include="GeoJSON.Net" Version="1.1.64" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net47' ">
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net462' ">
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+
+</Project>
