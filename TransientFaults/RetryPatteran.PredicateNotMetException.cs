@@ -2,11 +2,8 @@
 
 namespace TransientFaults
 {
-    public partial class RetryPatteran
+    public class PredicateNotMetException : Exception
     {
-        public class PredicateNotMetException : Exception
-        {
-            public PredicateNotMetException(string message) : base(message) { }
-        }
+        public PredicateNotMetException(string message) : base(message) { }
     }
 }

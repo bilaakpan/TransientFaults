@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using static TransientFaults.CircuitBreaker;
 
 namespace TransientFaults
 {
-    public partial class RetryPatteran : IRetryPatteran
+    public class RetryPatteran : IRetryPatteran
     {
         public class Config
         {
@@ -15,16 +14,13 @@ namespace TransientFaults
 
         public T Retry<T>(Func<T> func,Config config = null,Func<T,bool> retryIfTrue = null,ICircuitBreaker circuitBreaker = null)
         => RetryAsync((_) => Task.FromResult(func()),new CancellationToken(),config,retryIfTrue,circuitBreaker).Result;
-
-
+        
         public void Retry(Action action,Config config = null,ICircuitBreaker circuitBreaker = null)
         => RetryAsync(() => action(),new CancellationToken(),config,circuitBreaker).Wait();
-
-
+        
         public Task RetryAsync(Action action,CancellationToken token,Config config = null,ICircuitBreaker circuitBreaker = null)
-        => RetryAsync<int>((ct) => { action(); return Task.FromResult(0); },token,config,null,circuitBreaker);
-
-
+        => RetryAsync((ct) => { action(); return Task.FromResult(0); },token,config,null,circuitBreaker);
+        
         public async Task<T> RetryAsync<T>(Func<CancellationToken,Task<T>> funcAsync,CancellationToken token,Config config = null,Func<T,bool> retryIfTrue = null,ICircuitBreaker circuitBreaker = null)
         {
             var lastException = new Exception("Config has a RetryCount < 0.");
@@ -45,7 +41,7 @@ namespace TransientFaults
                     {
                         result = await funcAsync(token).ConfigureAwait(false);
                     }
-                    if(result != null && retryIfTrue?.Invoke(result) == true)
+                    if(result != null && !retryIfTrue?.Invoke(result) == true)
                     {
                         throw new PredicateNotMetException($"The {nameof(retryIfTrue)} condition was not meet");
                     }

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace TransientFaults
 {
-    public partial class CircuitBreaker : ICircuitBreaker
+    public class CircuitBreaker : ICircuitBreaker
     {
         private enum CircuitState
         {
@@ -41,7 +41,6 @@ namespace TransientFaults
 
         public void HardOpen() => State = CircuitState.HardOpen.ToString();
         
-
         private bool IsClosed => State == CircuitState.Closed.ToString();
 
         public void ExecuteTask(Action action) => ExecuteTaskAsync(() => action()).GetAwaiter().GetResult();
@@ -72,7 +71,6 @@ namespace TransientFaults
             catch(CircuitBreakerOpenException) { throw; }
             catch { Trip(); }
             throw new Exception($"Method failed to eacuate in Circuit Breaker: {action.ToString()}");
-
         }
     }
 }
