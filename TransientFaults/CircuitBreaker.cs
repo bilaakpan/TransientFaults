@@ -13,13 +13,13 @@ namespace TransientFaults
             HardOpen = 2
         }
 
-        ICircuitBreakerConfig _configuration { get; set; }
+        private readonly ICircuitBreakerConfig _configuration;
         public CircuitBreaker(ICircuitBreakerConfig configuration)
         {
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
-        public string State { get; private set; } = CircuitState.Closed.ToString();
+        public string State { get; private set; } = nameof(CircuitState.Closed);
         private DateTime LastTrippedUtc { get; set; }
         private short FailureCount { get; set; }
 
@@ -28,20 +28,20 @@ namespace TransientFaults
             if(FailureCount > _configuration.FailureCount)
             {
                 LastTrippedUtc = DateTime.UtcNow;
-                State = CircuitState.Open.ToString();
+                State = nameof(CircuitState.Open);
             }
             FailureCount++;
         }
 
         public void Reset()
         {
-            State = CircuitState.Closed.ToString();
+            State = nameof(CircuitState.Closed);
             FailureCount = 0;
         }
 
-        public void HardOpen() => State = CircuitState.HardOpen.ToString();
+        public void HardOpen() => State = nameof(CircuitState.HardOpen);
         
-        private bool IsClosed => State == CircuitState.Closed.ToString();
+        private bool IsClosed => State == nameof(CircuitState.Closed);
 
         public void ExecuteTask(Action action) => ExecuteTaskAsync(() => action()).GetAwaiter().GetResult();
 
@@ -55,9 +55,10 @@ namespace TransientFaults
         },new CancellationToken());
         public async Task<TResult> ExecuteTaskAsync<TResult>(Func<CancellationToken,Task<TResult>> action,CancellationToken token)
         {
-            if(State == CircuitState.HardOpen.ToString()) throw new CircuitBreakerOpenException("The Circuit Breaker is in a Hard Open state");
+            if(State == nameof(CircuitState.HardOpen)) throw new CircuitBreakerOpenException("The Circuit Breaker is in a Hard Open state");
             try
             {
+                token.ThrowIfCancellationRequested();
                 if(IsClosed) return await action(token).ConfigureAwait(false);
 
                 if(LastTrippedUtc.TimeOfDay + _configuration.HealPeriod < DateTime.UtcNow.TimeOfDay)
@@ -70,7 +71,7 @@ namespace TransientFaults
             catch(OperationCanceledException) { throw; }
             catch(CircuitBreakerOpenException) { throw; }
             catch { Trip(); }
-            throw new Exception($"Method failed to eacuate in Circuit Breaker: {action.ToString()}");
+            throw new Exception($"Method failed to eacuate in Circuit Breaker: {action}");
         }
     }
 }
