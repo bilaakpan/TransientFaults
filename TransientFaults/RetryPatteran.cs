@@ -13,13 +13,13 @@ namespace TransientFaults
         }
 
         public T Retry<T>(Func<T> func,Config config = null,Func<T,bool> retryIfTrue = null,ICircuitBreaker circuitBreaker = null)
-        => RetryAsync((_) => Task.FromResult(func()),new CancellationToken(),config,retryIfTrue,circuitBreaker).Result;
+        => RetryAsync(_ => Task.FromResult(func()),new CancellationToken(),config,retryIfTrue,circuitBreaker).GetAwaiter().GetResult();
         
         public void Retry(Action action,Config config = null,ICircuitBreaker circuitBreaker = null)
-        => RetryAsync(() => action(),new CancellationToken(),config,circuitBreaker).Wait();
+        => RetryAsync(action,new CancellationToken(),config,circuitBreaker).GetAwaiter().GetResult();
         
         public Task RetryAsync(Action action,CancellationToken token,Config config = null,ICircuitBreaker circuitBreaker = null)
-        => RetryAsync((ct) => { action(); return Task.FromResult(0); },token,config,null,circuitBreaker);
+        => RetryAsync(ct => { action(); return Task.FromResult(0); },token,config,null,circuitBreaker);
         
         public async Task<T> RetryAsync<T>(Func<CancellationToken,Task<T>> funcAsync,CancellationToken token,Config config = null,Func<T,bool> retryIfTrue = null,ICircuitBreaker circuitBreaker = null)
         {
@@ -35,13 +35,13 @@ namespace TransientFaults
                     T result;
                     if(circuitBreaker != null)
                     {
-                        result = await circuitBreaker.ExecuteTaskAsync(async (ct) => await funcAsync(token).ConfigureAwait(false),token).ConfigureAwait(false);
+                        result = await circuitBreaker.ExecuteTaskAsync(ct => funcAsync(token),token).ConfigureAwait(false);
                     }
                     else
                     {
                         result = await funcAsync(token).ConfigureAwait(false);
                     }
-                    if(result != null && !retryIfTrue?.Invoke(result) == true)
+                    if(result != null && retryIfTrue?.Invoke(result) == false)
                     {
                         throw new PredicateNotMetException($"The {nameof(retryIfTrue)} condition was not meet");
                     }
@@ -54,11 +54,9 @@ namespace TransientFaults
                 {
                     lastException = ex;
                 }
-                if(count < config.RetryCount)
-                {
-                    await Task.Delay(retryBackoffTimeSpan,token).ConfigureAwait(false);
-                    retryBackoffTimeSpan += retryBackoffTimeSpan;
-                }
+                if (count >= config.RetryCount) continue;
+                await Task.Delay(retryBackoffTimeSpan,token).ConfigureAwait(false);
+                retryBackoffTimeSpan += retryBackoffTimeSpan;
             }
             throw lastException;
         }
