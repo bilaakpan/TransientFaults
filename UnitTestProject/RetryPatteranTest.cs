@@ -3,7 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Threading.Tasks;
 using TransientFaults;
-using static TransientFaults.RetryPatteran;
+using static TransientFaults.RetryPattern;
 
 namespace UnitTestProject
 {
@@ -13,7 +13,7 @@ namespace UnitTestProject
         [TestMethod]
         public void Retry_Count_Match()
         {
-            var retry = new RetryPatteran();
+            var retry = new RetryPattern();
             var retryCount = 0;
             var firstAtemptOffset = 1;
             short timeToRetry = 4;
@@ -53,10 +53,10 @@ namespace UnitTestProject
 
         }
         [TestMethod]
-        [ExpectedException(exceptionType: typeof(PredicateNotMetException))]
+        [ExpectedException(exceptionType: typeof(PredicateNotMetException<int>))]
         public async Task Retry_Expecting_OperationCanceledException()
         {
-            var retry = new RetryPatteran();
+            var retry = new RetryPattern();
             var cancelTimeSpan = new System.Threading.CancellationTokenSource();
             var config = new Config
             {
@@ -70,7 +70,7 @@ namespace UnitTestProject
         [TestMethod]
         public async Task Retry_ReturnsResult()
         {
-            var retry = new RetryPatteran();
+            var retry = new RetryPattern();
             var cancelTimeSpan = new System.Threading.CancellationTokenSource();
             var config = new Config
             {
@@ -85,7 +85,7 @@ namespace UnitTestProject
         [TestMethod]
         public async Task Retry_ReturnsResultThroughCircuitBreaker()
         {
-            var retry = new RetryPatteran();
+            var retry = new RetryPattern();
             var cancelTimeSpan = new System.Threading.CancellationTokenSource();
             var cb = A.Fake<ICircuitBreaker>();
             A.CallTo(cb).WithReturnType<Task<int>>()                        
@@ -104,7 +104,7 @@ namespace UnitTestProject
         [ExpectedException(typeof(OperationCanceledException))]
         public async Task Retry_OperationCanceledException()
         {
-            var retry = new RetryPatteran();
+            var retry = new RetryPattern();
             var cancelTimeSpan = new System.Threading.CancellationTokenSource();
             var config = new Config
             {
@@ -121,7 +121,7 @@ namespace UnitTestProject
         [ExpectedException(typeof(CircuitBreakerOpenException))]
         public async Task Retry_CircuitBreakerOpenException()
         {
-            var retry = new RetryPatteran();
+            var retry = new RetryPattern();
             var cancelTimeSpan = new System.Threading.CancellationTokenSource();
             var config = new Config
             {

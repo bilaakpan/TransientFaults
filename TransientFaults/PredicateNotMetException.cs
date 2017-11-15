@@ -2,8 +2,9 @@
 
 namespace TransientFaults
 {
-    public class PredicateNotMetException : Exception
+    public class PredicateNotMetException<T> : Exception
     {
-        public PredicateNotMetException(string message) : base(message) { }
+        public PredicateNotMetException(string message, T item) : base(message) { Item = item; }
+        public T Item { get; set; }
     }
 }

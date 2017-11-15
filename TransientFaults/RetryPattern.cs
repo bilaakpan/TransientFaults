@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace TransientFaults
 {
-    public class RetryPatteran : IRetryPatteran
+    public class RetryPattern : IRetryPattern
     {
         public class Config
         {
@@ -43,7 +43,7 @@ namespace TransientFaults
                     }
                     if(result != null && retryIfTrue?.Invoke(result) == false)
                     {
-                        throw new PredicateNotMetException($"The {nameof(retryIfTrue)} condition was not meet");
+                        throw new PredicateNotMetException<T>($"The {nameof(retryIfTrue)} condition was not met",result);
                     }
 
                     return result;
