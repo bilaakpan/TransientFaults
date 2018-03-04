@@ -13,7 +13,7 @@ namespace TransientFaults
             HardOpen = 2
         }
 
-        private readonly ICircuitBreakerConfig _configuration;
+        public readonly ICircuitBreakerConfig _configuration;
         public CircuitBreaker(ICircuitBreakerConfig configuration)
         {
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
@@ -46,9 +46,9 @@ namespace TransientFaults
         public void ExecuteTask(Action action) => ExecuteTaskAsync(action).GetAwaiter().GetResult();
 
         public TResult ExecuteTask<TResult>(Func<TResult> action)
-        => ExecuteTaskAsync(ct => Task.FromResult(action()),new CancellationToken()).GetAwaiter().GetResult();
+        => ExecuteTaskAsync(_ => Task.FromResult(action()),new CancellationToken()).GetAwaiter().GetResult();
         public Task ExecuteTaskAsync(Action action)
-        => ExecuteTaskAsync(ct =>
+        => ExecuteTaskAsync(_ =>
         {
             action();
             return Task.FromResult(0);

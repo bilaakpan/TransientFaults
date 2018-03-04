@@ -12,14 +12,21 @@ namespace TransientFaults
             public TimeSpan RetryBackoffTimeSpan { get; set; }
         }
 
-        public T Retry<T>(Func<T> func,Config config = null,Func<T,bool> retryIfTrue = null,ICircuitBreaker circuitBreaker = null)
-        => RetryAsync(_ => Task.FromResult(func()),new CancellationToken(),config,retryIfTrue,circuitBreaker).GetAwaiter().GetResult();
-        
-        public void Retry(Action action,Config config = null,ICircuitBreaker circuitBreaker = null)
-        => RetryAsync(action,new CancellationToken(),config,circuitBreaker).GetAwaiter().GetResult();
-        
-        public Task RetryAsync(Action action,CancellationToken token,Config config = null,ICircuitBreaker circuitBreaker = null)
-        => RetryAsync(ct => { action(); return Task.FromResult(0); },token,config,null,circuitBreaker);
+        public T Retry<T>(Func<T> func, Config config = null, Func<T, bool> retryIfTrue = null,
+            ICircuitBreaker circuitBreaker = null)
+            => RetryAsync(_ => Task.FromResult(func()), new CancellationToken(), config, retryIfTrue, circuitBreaker)
+                .GetAwaiter().GetResult();
+
+        public void Retry(Action action, Config config = null, ICircuitBreaker circuitBreaker = null)
+            => RetryAsync(action, new CancellationToken(), config, circuitBreaker).GetAwaiter().GetResult();
+
+        public Task RetryAsync(Action action, CancellationToken token, Config config = null,
+            ICircuitBreaker circuitBreaker = null)
+            => RetryAsync(_ =>
+            {
+                action();
+                return Task.FromResult(0);
+            }, token, config, null, circuitBreaker);
         
         public async Task<T> RetryAsync<T>(Func<CancellationToken,Task<T>> funcAsync,CancellationToken token,Config config = null,Func<T,bool> retryIfTrue = null,ICircuitBreaker circuitBreaker = null)
         {
