@@ -6,14 +6,15 @@
     <Authors>Bila Akpan</Authors>
     <Company>Worksnippet</Company>
     <Owners>Bila Akpan</Owners>
-    <Description>Postmates .NET SDK</Description>
-    <PackageProjectUrl>https://github.com/bilaakpan/PostmatesSDK</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/bilaakpan/PostmatesSDK</RepositoryUrl>
+    <Description>ransientFaults (CircuitBreaker, and RetryPattern)</Description>
+    <PackageProjectUrl>https://github.com/bilaakpan/TransientFaults</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/bilaakpan/TransientFaults</RepositoryUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <summary>Postmates .NET SDK</summary>
-    <Title>Postmates .NET SDK</Title>
-    <PackageTags>Postmates</PackageTags>
-    <Tags>Postmates</Tags>
+    <summary>TransientFaults (CircuitBreaker, and RetryPattern)</summary>
+    <Title>TransientFaults</Title>
+    <PackageTags>TransientFaults,CircuitBreaker,RetryPattern</PackageTags>
+    <Tags>TransientFaults,CircuitBreaker,RetryPattern</Tags>
+    <Version>1.0.3</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
@@ -22,8 +23,7 @@
 
 
   <ItemGroup>
-    <PackageReference Include="GeoJSON.Net" Version="1.1.64" />
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">

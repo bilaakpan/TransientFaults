@@ -25,7 +25,7 @@ namespace TransientFaults
 
         private void Trip()
         {
-            if(FailureCount > _configuration.FailureCount)
+            if (FailureCount > _configuration.FailureCount)
             {
                 LastTrippedUtc = DateTime.UtcNow;
                 State = nameof(CircuitState.Open);
@@ -40,37 +40,47 @@ namespace TransientFaults
         }
 
         public void HardOpen() => State = nameof(CircuitState.HardOpen);
-        
+
         private bool IsClosed => State == nameof(CircuitState.Closed);
 
         public void ExecuteTask(Action action) => ExecuteTaskAsync(action).GetAwaiter().GetResult();
 
         public TResult ExecuteTask<TResult>(Func<TResult> action)
-        => ExecuteTaskAsync(_ => Task.FromResult(action()),new CancellationToken()).GetAwaiter().GetResult();
+        => ExecuteTaskAsync(_ => Task.FromResult(action()), new CancellationToken()).GetAwaiter().GetResult();
         public Task ExecuteTaskAsync(Action action)
         => ExecuteTaskAsync(_ =>
         {
             action();
             return Task.FromResult(0);
-        },new CancellationToken());
-        public async Task<TResult> ExecuteTaskAsync<TResult>(Func<CancellationToken,Task<TResult>> action,CancellationToken token)
+        }, new CancellationToken());
+        public Task<TResult> ExecuteTaskAsync<TResult>(Func<CancellationToken, Task<TResult>> action, CancellationToken token)
+        => ExecuteTaskAsync(action, token, null);
+
+        public async Task<TResult> ExecuteTaskAsync<TResult>(Func<CancellationToken, Task<TResult>> action, CancellationToken token, Func<Task<TResult>> circuitOpenValue)
         {
-            if(State == nameof(CircuitState.HardOpen)) throw new CircuitBreakerOpenException("The Circuit Breaker is in a Hard Open state");
+            if (State == nameof(CircuitState.HardOpen))
+                throw new CircuitBreakerOpenException("The Circuit Breaker is in a Hard Open state");
             try
             {
                 token.ThrowIfCancellationRequested();
-                if(IsClosed) return await action(token).ConfigureAwait(false);
+                if (IsClosed)
+                    return await action(token).ConfigureAwait(false);
 
-                if(LastTrippedUtc.TimeOfDay + _configuration.HealPeriod < DateTime.UtcNow.TimeOfDay)
+                if (LastTrippedUtc.TimeOfDay + _configuration.HealPeriod < DateTime.UtcNow.TimeOfDay)
                 {
                     var actionResult = await action(token).ConfigureAwait(false);
                     Reset();
                     return actionResult;
                 }
             }
-            catch(OperationCanceledException) { throw; }
-            catch(CircuitBreakerOpenException) { throw; }
+            catch (OperationCanceledException) { throw; }
+            catch (CircuitBreakerOpenException) { throw; }
             catch { Trip(); }
+
+            if (circuitOpenValue != null)
+            {
+                return await circuitOpenValue();
+            }
             throw new Exception($"Method failed to eacuate in Circuit Breaker: {action}");
         }
     }
